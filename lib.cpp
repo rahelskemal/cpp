@@ -12,7 +12,7 @@ class Library {
 public: 
     void control_pan();
     void add_book();
-    void show_data();
+    // void show_data();
     void display_books();
     void delete_book();
 };
@@ -42,7 +42,7 @@ void Library::add_book()
     // data file that holds all books 
  
     // variables 
-    int no_book;
+    // int no_book;
     int book_Id;
     std::string book_title;
     std::string author;
@@ -53,55 +53,85 @@ void Library::add_book()
     //         "----------------------------\n";
     std::cout << " Book ID:  ";
     std::cin >> book_Id;
-    std::cout << "----------------------------------------------"
-            "----------------------------\n";
-    std::cout << "\n\n\t\t\t Book Title" ": ";
+
+    std::cout << "Book Title: ";
     std::cin >> book_title;
 
-    std::cout << "\n\n Author" ": ";
+    std::cout << "Author: ";
     std::cin >> author;
 
-    std::cout << "\n\n\t\t\t No. Of Item" ": ";
-    std::cin >> no_book;
+    
+
+    // std::cout << "\n\n No. Of Item: ";
+    // std::cin >> no_book;
 
     // 
-    std::ofstream outf{"book.txt"};
-    outf.open("D://book.txt", std::ios::out | std::ios::app);
-    if(!outf) {
+    std::ofstream outf;
+    outf.open("book.txt", std::ios::out | std::ios::app);
+    if(!outf.is_open()) {
         std::cerr<<"\nNot able to create a file. MAJOR OS ERROR!! \n";
         outf.close();
-    } else {
-         outf << " " << book_Id << " " << book_title << " "
-         << author << " " << no_book << "\n";
-    std::cout << "=============================================="
-            "============================"
-         << std::endl;
-    outf.close();
+    } 
+
+    outf << "Book ID: " << book_Id << std::endl;
+    outf << "Book Title: " << book_title << std::endl;
+    outf << "Book Author: " << author << std::endl;
+    // outf << no_book << std::endl;
+
+    // outf << " " << book_Id << " " << book_title << " "
+    //      << author << " " << no_book << "\n";
+    // std::cout << "=============================================="
+    //         "============================"
+    //      << std::endl;
+
+    if (outf.fail()) {
+        std::cerr << "ERROR: Failed to write data to the file" <<std::endl;
+        outf.close(); 
     } 
    
+   outf.close();
+//    CHECK THE DATA WAS SAVED 
+
+    std::ifstream inputFile("book.txt");
+    if (inputFile) {
+        inputFile.seekg(0, std::ios::end);
+        if(inputFile.tellg() !=0) {
+            std::cout << "Book was saved successfully in file" << std::endl;
+        } else {
+            std::cerr << "ERROR: File is empty" << std::endl;
+        }
+    } else {
+        std::cerr << "ERROR: File does not exist" << std::endl;
+    }
+    inputFile.close();
 }
 
 
-void Library::show_data() 
-{
-    std::cout <<"\nBook ID: " <<book_Id;
-    std::cout <<"\nBook Title: " <<book_title;
-}
+// void Library::show_data() 
+// {
+//     std::cout <<"\nBook ID: " <<book_Id;
+//     std::cout <<"\nBook Title: " <<book_title;
+// }
 
 void Library::display_books()
 {
     std::string getcontent;
-    std::ifstream openfile("book.txt");
-    if (openfile.is_open()) 
+    std::ifstream inputFile;
+    inputFile.open("book.txt", std::ios::in);
+    // std::ifstream openfile("book.txt");
+    if (!inputFile.is_open()) 
     {
-        while(openfile.eof()) 
-        {
-            getline(openfile, getcontent);
+
+        std::cerr << "Error: Unable to open the file.";
+    }
+    
+    while(std::getline(inputFile, getcontent)) {
             std::cout << getcontent << std::endl;
         }
+
+    inputFile.close();
     }
 
-}
 
 void Library::delete_book(){}
 
@@ -123,14 +153,14 @@ int main()
     case 1:
         do {
             l.add_book();
-            std::cout << "Do You Want To A Book? (y/n) "
+            std::cout << "Do You Want To add another Book? (y/n) "
                     ": ";
             std::cin >> x;
         } while (x == 'y');
         break;
     case 2: 
         {
-            l.show_data();
+            l.display_books();
         }
         break;
     default:
