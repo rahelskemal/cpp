@@ -1,21 +1,24 @@
 // from standard lib
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include <sstream> 
 
 class Library {
 
     int book_Id;
-    char book_title;
-    char author;
-    int book_no;
+    std::string book_title;
+    std::string author;
 
 public: 
     void control_pan();
     void add_book();
+    void add_book_v();
     // void show_data();
     void display_books();
     void delete_book();
 };
+
 
 void Library::control_pan()
 {
@@ -24,12 +27,70 @@ void Library::control_pan()
     std::cout << "\t\t\t Control Panel\n";
 
     std::cout << "1. Add New Book\n";
- 
     std::cout << "2. Display Books\n";
-    std::cout << "3. Check Specific Item\n";
-    std::cout << "4. Delete Book\n";
-    std::cout << "5. Exit\n";
+    std::cout << "3. Delete Book\n";
+    std::cout << "4. Checkout Book\n";
+    std::cout << "5. Return Book\n";
     
+    std::cout << "6. Exit\n";
+    
+}
+
+// using vectors - similar to an array but allows an array to dynamically change sizes
+void Library::add_book_v(){
+
+    // creating a vector 
+    std::vector<Library> books;
+    std::string input; 
+
+    while (true) {
+        Library book;
+        std::cout << "Enter Book Title" << std::endl;
+        std::getline(std::cin, input);
+
+        book.book_title = input;
+
+        std::cout << "Who is the Author?: ";
+        std::getline(std::cin, input);
+        std::istringstream(input) >> book.author;
+
+        // adding to the end of a vector
+        books.push_back(book);
+
+        std::ofstream outf;
+        outf.open("book.txt", std::ios::out | std::ios::app);
+        if(!outf.is_open()) {
+            std::cerr<<"\nNot able to create a file. MAJOR OS ERROR!! \n";
+            outf.close();
+        } 
+
+        for (auto& book : books ) {
+            outf << book.book_title << " " << book.author << std::endl;
+        }
+
+        if (outf.fail()) {
+            std::cerr << "ERROR: Failed to write data to the file" <<std::endl;
+            outf.close(); 
+        } 
+   
+        outf.close();
+
+//    CHECK THE DATA WAS SAVED 
+
+        std::ifstream inputFile("book.txt");
+        if (inputFile) {
+            inputFile.seekg(0, std::ios::end);
+        if(inputFile.tellg() !=0) {
+            std::cout << "Book was saved successfully in file" << std::endl;
+        } else {
+            std::cerr << "ERROR: File is empty" << std::endl;
+        }
+        } else {
+            std::cerr << "ERROR: File does not exist" << std::endl;
+        }
+        inputFile.close();
+    }
+
 }
 
 void Library::add_book()
@@ -42,7 +103,6 @@ void Library::add_book()
     // data file that holds all books 
  
     // variables 
-    // int no_book;
     int book_Id;
     std::string book_title;
     std::string author;
@@ -133,7 +193,31 @@ void Library::display_books()
     }
 
 
-void Library::delete_book(){}
+void Library::delete_book(){
+// open the file we are reading from
+// in that file, look for the title we want to delete
+// create a new temp file to hold the new data with all the books minus the one we want to delete
+
+    std::ifstream inputFile("book.txt");
+    
+    // new file to rewrite the data
+
+    std::ofstream newFile("updatedbooks.txt");
+
+    std::string line;
+    std::string title;
+
+    std::cout << "What book should we delete? ";
+    std::cin >> title;
+
+    while (std::getline(inputFile, line)) {
+        if(line.find(title) == std::string::npos) {
+            newFile << line << std::endl;
+        }
+    }
+    inputFile.close();
+    newFile.close();
+}
 
 
 
@@ -152,7 +236,7 @@ int main()
     {
     case 1:
         do {
-            l.add_book();
+            l.add_book_v();
             std::cout << "Do You Want To add another Book? (y/n) "
                     ": ";
             std::cin >> x;
@@ -161,6 +245,11 @@ int main()
     case 2: 
         {
             l.display_books();
+        }
+        break;
+    case 3: 
+        {
+            l.delete_book();
         }
         break;
     default:
