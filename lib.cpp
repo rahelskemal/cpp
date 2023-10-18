@@ -4,11 +4,21 @@
 #include <vector>
 #include <sstream> 
 
+
+class User {
+    public:
+        std::string name;
+        int userId;
+        std::vector<std::string> checkedOutBooks;
+    User(const std::string&_name, int _userId) : name(_name), userId(_userId){}
+};
+
 class Library {
 
     int book_Id;
     std::string book_title;
     std::string author;
+    // std::string book_status;
 
 public: 
 void control_pan();
@@ -43,6 +53,7 @@ void Library::add_book()
     outf.open("book.txt", std::ios::out | std::ios::app);
 
     if (outf.is_open()) {
+        std::string book_status = "Available";
         std::cout << "Enter Book ID: ";
         std::cin >> book_Id;
 
@@ -57,6 +68,7 @@ void Library::add_book()
         outf << "Book ID: " << book_Id << std::endl;
         outf << "Book Title: " << book_title << std::endl;
         outf << "Book Author: " << author << std::endl;
+        outf << "Book Status: " << book_status << std::endl;
 
         std::cout << "Book added successfully! \n";
         outf.close();
@@ -88,19 +100,32 @@ void Library::update_book_status(const std::string& title, const std::string& ne
 
     std::string line;
 
+    bool bookFound = false;
+
     while (std::getline(inputFile, line)) {
         if (line.find("Book Title: " + title) != std::string::npos){
-            tempFile << "Book Status: " << newStatus << std::endl;
+            bookFound = true;
+            if (line.find("Book Status: Available") != std::string::npos){
+                tempFile << "Book Status: " << newStatus << std::endl;
+                std::cout << "Book status updated successfully!  Book is now checked out." << std::endl;
+            } else {
+                std::cout << "Sorry, this book is currently unavailable" << std::endl;
+                tempFile << line << std::endl;
+            }
         } else {
-            tempFile << line << std::endl;
+            tempFile <<line << std::endl;
         }
     }
     inputFile.close();
     tempFile.close();
 
-    std::remove("book.txt");
-    std::rename("temp.txt", "book.txt");
-
+    if (bookFound){
+        std::remove("book.txt");
+        std::rename("temp.txt", "book.txt");
+    } else {
+        std::cout << "Book not found." << std::endl;
+        std::remove("temp.txt");
+    }
 }
 
 void Library::display_books()
@@ -151,13 +176,12 @@ void Library::delete_book(){
     std::rename("updatedbooks.txt", "book.txt");
 }
 
-void Library::update_book_status(const std::string& title, const std::string& newStatus) {
-
-}
-
 
 int main()
 {
+
+    User user("RK", 1);
+    
     Library l;
 
     l.control_pan();
@@ -207,4 +231,5 @@ int main()
         }
 
     return 0;
+    } 
 };
